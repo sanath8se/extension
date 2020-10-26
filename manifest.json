@@ -1,0 +1,28 @@
+{
+   "manifest_version": 2,
+   "name": "Legal Critical Keyword scanning",
+   "description": "chrome extention to scan citi sites for legal critical keywords and highlight/alert QA to do additional check",
+   "version": "1.0.2",
+   "browser_action": {
+     "default_popup": "html/popup.html"
+   },
+   "permissions": [
+     "storage"
+   ],
+   "background": {
+     "scripts": [
+       "js/background.js"
+     ]
+   },
+   "content_scripts": [
+     {
+       "matches": [
+         "http://*/*",
+         "https://*/*"
+       ],
+       "js": [
+         "js/content.js"
+       ]
+     }
+   ]
+ }
