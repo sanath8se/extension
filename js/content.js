@@ -1,50 +1,17 @@
 
 chrome.extension.onMessage.addListener(function (message, sender, callback) {
-    console.log("couldn't find word4");
+    var focusWords = new FocusWords("");
+    //var usSocialSecurityNumber = /\b\d{3}[ -.]\d{2}[ -.]\d{4}\b/g
+    focusWords.remove();
     if (message.wordToHighlight) {
-        var myHilitor = new Wordhighlighter("");
-        console.log("couldn't find word5");
-        //focusWord("google", "#00ff00")
-        myHilitor.apply("google is good");	
+        focusWords.apply(message.wordToHighlight);
+
     }
+    Promise.resolve("").then(result => callback(result));
+return true;
 });
 
-
-// var focusWord = function (word, color) {
-
-
-//     //window.getSelection().removeAllRanges(); this might already be done by new chrome
-//     var scopeList = [];
-//     if (window.find(word, false, false, false, false, false, false)) { //window.find(aString, aCaseSensitive, aBackwards, aWrapAround, aWholeWord, aSearchInFrames, aShowDialog);
-//         do {
-//             scopeList.push(window.getSelection().getRangeAt(0));
-//         } while (window.find(word, false, false, false, false, false, false));
-//         window.scrollTo(0, 0);
-//     } else {
-//         console.log("couldn't find word" + word);
-//     }
-//     scopeList.forEach(function (e) {
-//         colorSelection(e, color);
-//     });
-// };
-
-// var colorSelection = function (scope, color) {
-
-//     var node = document.createElement("i");
-//     var selectorName = node.className = "select".concat(color);
-//     node.classList.add("select");
-
-//     // // add highlight class style in CSS
-//     // if (!ruleExistenceDict[color]) {
-//     // 	sheet.insertRule([".", selectorName, " { background: #", color, " !important; }"].join(""), 0);
-//     // 	ruleExistenceDict[color] = true;
-//     // 	console.log(sheet);
-//     // }
-//     node.appendChild(scope.extractContents());
-//     scope.insertNode(node);
-// };
-
-function Wordhighlighter(id, tag) {
+function FocusWords(id, tag) {
 
     var focusNode = document.body;
     var focusTag = tag || "MARK";
@@ -53,44 +20,8 @@ function Wordhighlighter(id, tag) {
     var wordColor = [];
     var colorIdx = 0;
     var matchRegExp = "";
-    var openLeft = false;
-    var openRight = false;
-
     var endRegExp = new RegExp('^[^\\w]+|[^\\w]+$', "g");
-
     var breakRegExp = new RegExp('[^\\w\'-]+', "g");
-
-    this.setEndRegExp = function (regex) {
-        endRegExp = regex;
-        return endRegExp;
-    };
-
-    this.setBreakRegExp = function (regex) {
-        breakRegExp = regex;
-        return breakRegExp;
-    };
-
-    this.setMatchType = function (type) {
-        switch (type) {
-            case "left":
-                this.openLeft = false;
-                this.openRight = true;
-                break;
-
-            case "right":
-                this.openLeft = true;
-                this.openRight = false;
-                break;
-
-            case "open":
-                this.openLeft = this.openRight = true;
-                break;
-
-            default:
-                this.openLeft = this.openRight = false;
-
-        }
-    };
 
     this.setRegex = function (input) {
         input = input.replace(endRegExp, "");
@@ -98,25 +29,11 @@ function Wordhighlighter(id, tag) {
         input = input.replace(/^\||\|$/g, "");
         if (input) {
             var re = "(" + input + ")";
-            if (!this.openLeft) {
-                re = "\\b" + re;
-            }
-            if (!this.openRight) {
-                re = re + "\\b";
-            }
             matchRegExp = new RegExp(re, "i");
             return matchRegExp;
         }
         return false;
     };
-
-    this.getRegex = function () {
-        var retval = matchRegExp.toString();
-        retval = retval.replace(/(^\/(\\b)?|\(|\)|(\\b)?\/i$)/g, "");
-        retval = retval.replace(/\|/g, " ");
-        return retval;
-    };
-
     this.focusWords = function (node) {
         if (node === undefined || !node) return;
         if (!matchRegExp) return;
@@ -143,8 +60,6 @@ function Wordhighlighter(id, tag) {
             }
         };
     };
-
-    // highlighting remove 
     this.remove = function () {
         var arr = document.getElementsByTagName(focusTag);
         while (arr.length && (el = arr[0])) {
@@ -153,10 +68,8 @@ function Wordhighlighter(id, tag) {
             parent.normalize();
         }
     };
-
-    //  highlighting start
     this.apply = function (input) {
-        this.remove();
+        //this.remove();
         if (input === undefined || !(input = input.replace(/(^\s+|\s+$)/g, ""))) {
             return;
         }
