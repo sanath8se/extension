@@ -16,7 +16,7 @@ function FocusWords(id, tag) {
 
     var focusNode = document.body;
     var tags = tag || "MARK";
-    var skipTags = new RegExp("^(?:" + tags + "|SCRIPT|FORM|SPAN)$");
+    var skipTags = new RegExp("^(?:" + tags + "|SCRIPT|FORM)$");
     var colors = ["#ff6", "#a0ffff", "#9f9", "#f99", "#f6f"];
     var wordColor = [];
     var colorIdx = 0;

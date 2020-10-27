@@ -5,7 +5,7 @@ chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
           "currentWindow": true
       }, function (tabs) {
           chrome.tabs.sendMessage(tabId, {
-              "wordToHighlight": "permanent responsible liable"},function(response) {
+              "wordToHighlight": "permanent Customer Responsible liable"},function(response) {
                 }
           );
       });
