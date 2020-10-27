@@ -24,6 +24,7 @@ function FocusWords(id, tag) {
     var endRegExp = new RegExp('^[^\\w]+|[^\\w]+$', "g");
     var breakRegExp = new RegExp('[^\\w\'-]+', "g");
 
+    //transform the input into regex for matching
     this.setRegex = function (input) {
         input = input.replace(endRegExp, "");
         input = input.replace(breakRegExp, "|");
@@ -35,6 +36,8 @@ function FocusWords(id, tag) {
         }
         return false;
     };
+
+    //loop through document body and match with regex
     this.focus = function (node) {
         if (node === undefined || !node) return;
         if (!matchRegExp) return;
@@ -50,6 +53,8 @@ function FocusWords(id, tag) {
             }
         };
     };
+
+    //remove existing highlight
     this.remove = function () {
         var arr = document.getElementsByTagName(tags);
         while (arr.length && (el = arr[0])) {
@@ -58,6 +63,8 @@ function FocusWords(id, tag) {
             parent.normalize();
         }
     };
+
+    
     this.apply = function (input) {
         if (input === undefined || !(input = input.replace(/(^\s+|\s+$)/g, ""))) {
             return;
@@ -72,6 +79,7 @@ function FocusWords(id, tag) {
         this.pii(focusNode);
     };
 
+    //to highlight pii data on screen. For prototype, only SSN will be highlighted
     this.pii = function (node) {
         if (node === undefined || !node) return;
         if (skipTags.test(node.nodeName)) return;
@@ -89,6 +97,7 @@ function FocusWords(id, tag) {
     };
 
 
+    //function which adds style to text on UI
     function highlight(node) {
         if (!wordColor[regs[0].toLowerCase()]) {
             wordColor[regs[0].toLowerCase()] = colors[colorIdx++ % colors.length];

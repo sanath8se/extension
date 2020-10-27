@@ -1,6 +1,6 @@
 {
    "manifest_version": 2,
-   "name": "Legal Critical Keyword scanning",
+   "name": "Citi Scan Bot",
    "description": "chrome extention to scan citi sites for legal critical keywords and highlight/alert QA to do additional check",
    "version": "1.0.2",
    "browser_action": {
