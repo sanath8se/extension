@@ -1,10 +1,11 @@
 
 chrome.extension.onMessage.addListener(function (message, sender, callback) {
     var focusWords = new FocusWords("");
-    //var usSocialSecurityNumber = /\b\d{3}[ -.]\d{2}[ -.]\d{4}\b/g
+    
     focusWords.remove();
     if (message.wordToHighlight) {
         focusWords.apply(message.wordToHighlight);
+        focusWords.piiapply();
 
     }
     Promise.resolve("").then(result => callback(result));
@@ -14,8 +15,8 @@ return true;
 function FocusWords(id, tag) {
 
     var focusNode = document.body;
-    var focusTag = tag || "MARK";
-    var skipTags = new RegExp("^(?:" + focusTag + "|SCRIPT|FORM|SPAN)$");
+    var tags = tag || "MARK";
+    var skipTags = new RegExp("^(?:" + tags + "|SCRIPT|FORM|SPAN)$");
     var colors = ["#ff6", "#a0ffff", "#9f9", "#f99", "#f6f"];
     var wordColor = [];
     var colorIdx = 0;
@@ -34,34 +35,23 @@ function FocusWords(id, tag) {
         }
         return false;
     };
-    this.focusWords = function (node) {
+    this.focus = function (node) {
         if (node === undefined || !node) return;
         if (!matchRegExp) return;
         if (skipTags.test(node.nodeName)) return;
 
         if (node.hasChildNodes()) {
             for (var i = 0; i < node.childNodes.length; i++)
-                this.focusWords(node.childNodes[i]);
+                this.focus(node.childNodes[i]);
         }
         if (node.nodeType == 3) { // NODE_TEXT
             if ((nv = node.nodeValue) && (regs = matchRegExp.exec(nv))) {
-                if (!wordColor[regs[0].toLowerCase()]) {
-                    wordColor[regs[0].toLowerCase()] = colors[colorIdx++ % colors.length];
-                }
-
-                var match = document.createElement(focusTag);
-                match.appendChild(document.createTextNode(regs[0]));
-                match.style.backgroundColor = wordColor[regs[0].toLowerCase()];
-                match.style.color = "#000";
-
-                var after = node.splitText(regs.index);
-                after.nodeValue = after.nodeValue.substring(regs[0].length);
-                node.parentNode.insertBefore(match, after);
+                highlight(node);
             }
         };
     };
     this.remove = function () {
-        var arr = document.getElementsByTagName(focusTag);
+        var arr = document.getElementsByTagName(tags);
         while (arr.length && (el = arr[0])) {
             var parent = el.parentNode;
             parent.replaceChild(el.firstChild, el);
@@ -69,14 +59,48 @@ function FocusWords(id, tag) {
         }
     };
     this.apply = function (input) {
-        //this.remove();
         if (input === undefined || !(input = input.replace(/(^\s+|\s+$)/g, ""))) {
             return;
         }
         if (this.setRegex(input)) {
-            this.focusWords(focusNode);
+            this.focus(focusNode);
         }
         return matchRegExp;
     };
 
+    this.piiapply = function () {
+        this.pii(focusNode);
+    };
+
+    this.pii = function (node) {
+        if (node === undefined || !node) return;
+        if (skipTags.test(node.nodeName)) return;
+
+        if (node.hasChildNodes()) {
+            for (var i = 0; i < node.childNodes.length; i++)
+                this.pii(node.childNodes[i]);
+        }
+        if (node.nodeType == 3) { // NODE_TEXT
+            var usSocialSecurityNumber = /\b\d{3}[ -.]\d{2}[ -.]\d{4}\b/g;
+            if ((nv = node.nodeValue) && (regs = usSocialSecurityNumber.exec(nv))) {
+                highlight(node);
+            }
+        };
+    };
+
+
+    function highlight(node) {
+        if (!wordColor[regs[0].toLowerCase()]) {
+            wordColor[regs[0].toLowerCase()] = colors[colorIdx++ % colors.length];
+        }
+
+        var match = document.createElement(tags);
+        match.appendChild(document.createTextNode(regs[0]));
+        match.style.backgroundColor = wordColor[regs[0].toLowerCase()];
+        match.style.color = "#000";
+
+        var after = node.splitText(regs.index);
+        after.nodeValue = after.nodeValue.substring(regs[0].length);
+        node.parentNode.insertBefore(match, after);
+    }
 }
